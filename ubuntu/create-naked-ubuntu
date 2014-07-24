@@ -1,0 +1,14 @@
+#!/bin/sh
+
+script_dir="$(dirname "$(readlink -f "$0")")"
+mkdir -p /tmp/naked-docker
+cd /tmp/naked-docker
+if ! test -e dotcloud
+then
+    git clone https://github.com/dotcloud/docker dotcloud
+fi
+sudo rm -rf image
+sudo dotcloud/contrib/mkimage.sh \
+  -d image -t ceejatec/naked-ubuntu:10.04 \
+  debootstrap lucid
+
