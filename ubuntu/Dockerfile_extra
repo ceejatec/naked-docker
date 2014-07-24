@@ -1,0 +1,2 @@
+ADD sources.list /etc/apt/sources.list
+RUN mkdir /var/lib/apt/lists/partial; apt-get update

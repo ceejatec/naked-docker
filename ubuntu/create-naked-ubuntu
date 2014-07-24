@@ -10,5 +10,9 @@ fi
 sudo rm -rf image
 sudo dotcloud/contrib/mkimage.sh \
   -d image -t ceejatec/naked-ubuntu:10.04 \
-  debootstrap lucid
+  debootstrap lucid http://mirror.anl.gov/pub/ubuntu/
 
+# Add to the debootstrap-created Dockerfile and regenerate
+sudo cp "$script_dir/sources.list" image
+sudo sh -cx "cat "'"'"$script_dir/Dockerfile_extra"'"'" >> image/Dockerfile"
+sudo docker build -t ceejatec/naked-ubuntu:10.04 image
