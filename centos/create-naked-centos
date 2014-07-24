@@ -1,0 +1,14 @@
+#!/bin/sh
+
+mkdir -p /tmp/naked-docker
+cd /tmp/naked-docker
+if ! test -e dotcloud
+then
+    git clone https://github.com/dotcloud/docker dotcloud
+fi
+sudo rm -rf image
+sudo dotcloud/contrib/mkimage.sh \
+  -d image -t ceejatec/naked-centos:6.4 \
+  rinse --distribution centos-6 \
+  --mirror http://vault.centos.org/6.4/os/x86_64/Packages \
+  --before-post-install `pwd`/overwrite-base-repo.sh
