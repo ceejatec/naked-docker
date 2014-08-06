@@ -1,0 +1,17 @@
+#!/bin/sh
+
+script_dir="$(dirname "$(readlink -f "$0")")"
+mkdir -p /tmp/naked-docker
+cd /tmp/naked-docker
+if ! test -e dotcloud
+then
+    git clone https://github.com/dotcloud/docker dotcloud
+fi
+sudo rm -rf image
+sudo dotcloud/contrib/mkimage.sh \
+  -d image -t ceejatec/naked-debian:7.6 \
+  debootstrap wheezy
+
+# Add "apt-get update" step
+sudo sh -cx "cat "'"'"$script_dir/Dockerfile_extra"'"'" >> image/Dockerfile"
+sudo docker build -t ceejatec/naked-debian:7.6 image
