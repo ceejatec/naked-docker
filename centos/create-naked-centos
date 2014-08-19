@@ -1,15 +1,38 @@
 #!/bin/sh
 
+CENTOS_VER=$1
+export CENTOS_VER
+if test -z "$CENTOS_VER"
+then
+    echo "Usage: $0 <centos version>"
+    exit 1
+fi
+
+CENTOS_BASE=`echo $CENTOS_VER | sed -e "s/\..*//"`
+export CENTOS_BASE
+
 script_dir="$(dirname "$(readlink -f "$0")")"
+
+# Create overwrite script and base-repo from template
 mkdir -p /tmp/naked-docker
+cat "$script_dir/CentOS-Base.repo.tmpl" \
+  | sed -e "s/@@CENTOS_VER@@/$CENTOS_VER/g" \
+  | sed -e "s/@@CENTOS_BASE@@/$CENTOS_BASE/g" \
+  > /tmp/naked-docker/CentOS-Base.repo
+
+# Check out dotcloud repository
 cd /tmp/naked-docker
 if ! test -e dotcloud
 then
     git clone https://github.com/dotcloud/docker dotcloud
 fi
-sudo rm -rf image
+
+# Create image!
+image_name="ceejatec/naked-centos:$CENTOS_VER"
+echo "Creating $image_name..."
+sudo rm -rf image /var/cache/rinse/centos-release*
 sudo dotcloud/contrib/mkimage.sh \
-  -d image -t ceejatec/naked-centos:6.4 \
-  rinse --distribution centos-6 \
-  --mirror http://vault.centos.org/6.4/os/x86_64/Packages \
+  -d image -t "$image_name" \
+  rinse --distribution "centos-$CENTOS_BASE" \
+  --mirror "http://vault.centos.org/$CENTOS_VER/os/x86_64/Packages" \
   --before-post-install "$script_dir/overwrite-base-repo.sh"

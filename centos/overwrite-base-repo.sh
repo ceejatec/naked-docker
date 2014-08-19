@@ -1,4 +1,5 @@
 #!/bin/sh
 
 prefix=$1
-cp CentOS-Base.repo $prefix/etc/yum.repos.d
+rm $prefix/etc/yum.repos.d/*
+cp /tmp/naked-docker/CentOS-Base.repo $prefix/etc/yum.repos.d
