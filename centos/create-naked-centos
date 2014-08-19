@@ -10,6 +10,12 @@ fi
 
 CENTOS_BASE=`echo $CENTOS_VER | sed -e "s/\..*//"`
 export CENTOS_BASE
+if test "$CENTOS_BASE" = "5"
+then
+    pkgsubdir=CentOS
+else
+    pkgsubdir=Packages
+fi
 
 script_dir="$(dirname "$(readlink -f "$0")")"
 
@@ -30,9 +36,9 @@ fi
 # Create image!
 image_name="ceejatec/naked-centos:$CENTOS_VER"
 echo "Creating $image_name..."
-sudo rm -rf image /var/cache/rinse/centos-release*
+sudo rm -rf image /var/cache/rinse/*/centos-release*
 sudo dotcloud/contrib/mkimage.sh \
   -d image -t "$image_name" \
   rinse --distribution "centos-$CENTOS_BASE" \
-  --mirror "http://vault.centos.org/$CENTOS_VER/os/x86_64/Packages" \
+  --mirror "http://vault.centos.org/$CENTOS_VER/os/x86_64/$pkgsubdir" \
   --before-post-install "$script_dir/overwrite-base-repo.sh"
