@@ -1,18 +1,37 @@
 #!/bin/sh
 
+UBUNTU_VER=$1
+UBUNTU_REL=$2
+if test -z "$UBUNTU_REL"
+then
+    echo "Usage: $0 <ubuntu version> <release name>"
+    echo "   eg: $0 10.04 lucid"
+    exit 1
+fi
+
 script_dir="$(dirname "$(readlink -f "$0")")"
+
+# Create overwrite script and base-repo from template
 mkdir -p /tmp/naked-docker
+cat "$script_dir/sources.list.tmpl" \
+  | sed -e "s/@@UBUNTU_REL@@/$UBUNTU_REL/g" \
+  > /tmp/naked-docker/sources.list
+
+# Check out dotcloud repository
 cd /tmp/naked-docker
 if ! test -e dotcloud
 then
     git clone https://github.com/dotcloud/docker dotcloud
 fi
+
+# Create image!
+image_name="ceejatec/naked-ubuntu:$UBUNTU_VER"
 sudo rm -rf image
 sudo dotcloud/contrib/mkimage.sh \
-  -d image -t ceejatec/naked-ubuntu:10.04 \
-  debootstrap lucid http://mirror.anl.gov/pub/ubuntu/
+  -d image -t "$image_name" \
+  debootstrap $UBUNTU_REL http://mirror.anl.gov/pub/ubuntu/
 
 # Add to the debootstrap-created Dockerfile and regenerate
-sudo cp "$script_dir/sources.list" image
+sudo cp sources.list image
 sudo sh -cx "cat "'"'"$script_dir/Dockerfile_extra"'"'" >> image/Dockerfile"
-sudo docker build -t ceejatec/naked-ubuntu:10.04 image
+sudo docker build -t "$image_name" image
