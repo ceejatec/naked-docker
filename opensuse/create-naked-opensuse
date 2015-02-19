@@ -1,0 +1,34 @@
+#!/bin/sh
+
+OPENSUSE_VER=$1
+export OPENSUSE_VER
+if test -z "$OPENSUSE_VER"
+then
+    echo "Usage: $0 <opensuse version>"
+    exit 1
+fi
+
+OPENSUSE_BASE=`echo $OPENSUSE_VER | sed -e "s/\..*//"`
+export OPENSUSE_BASE
+
+script_dir="$(dirname "$(readlink -f "$0")")"
+
+mkdir -p /tmp/naked-docker
+
+# Check out dotcloud repository
+cd /tmp/naked-docker
+if ! test -e dotcloud
+then
+    git clone https://github.com/dotcloud/docker dotcloud
+    cp -a "$script_dir/suserinse" /tmp/naked-docker/dotcloud/contrib/mkimage
+fi
+
+# Create image!
+image_name="ceejatec/naked-opensuse:$OPENSUSE_VER"
+echo "Creating $image_name..."
+ls -l /var/cache/rinse/*/opensuse-release*
+sudo rm -rf image /var/cache/rinse/*/opensuse-release*
+sudo dotcloud/contrib/mkimage.sh \
+  -d image -t "$image_name" \
+  suserinse --distribution "opensuse-$OPENSUSE_VER" \
+  --mirror "http://ftp5.gwdg.de/pub/opensuse/discontinued/distribution/$OPENSUSE_VER/repo/oss/suse/x86_64"
