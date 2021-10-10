@@ -9,6 +9,8 @@ shift
 (
 	set -x
 	rinse --directory "$rootfsDir" --arch amd64 "$@"
+        umount -l `pwd`/"$rootfsDir"/proc
+        umount -l `pwd`/"$rootfsDir"/sys
 )
 
 "$(dirname "$BASH_SOURCE")/.febootstrap-minimize" "$rootfsDir"

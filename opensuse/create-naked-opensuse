@@ -20,14 +20,14 @@ cd /tmp/naked-docker
 if ! test -e dotcloud
 then
     git clone https://github.com/dotcloud/docker dotcloud
-    cp -a "$script_dir/suserinse" /tmp/naked-docker/dotcloud/contrib/mkimage
 fi
+cp -a "$script_dir/suserinse" /tmp/naked-docker/dotcloud/contrib/mkimage
 
 # Create image!
 image_name="ceejatec/naked-opensuse:$OPENSUSE_VER"
 echo "Creating $image_name..."
-ls -l /var/cache/rinse/*/opensuse-release*
-sudo rm -rf image /var/cache/rinse/*/opensuse-release*
+ls -l /var/cache/rinse/*/openSUSE-release*
+sudo rm -rf image /var/cache/rinse/*/openSUSE-release*
 sudo dotcloud/contrib/mkimage.sh \
   -d image -t "$image_name" \
   suserinse --distribution "opensuse-$OPENSUSE_VER" \
